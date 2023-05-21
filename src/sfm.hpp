@@ -46,8 +46,8 @@
  */
 class SFM_Module{
 public:
-#if defined(ARDUINO_AVR_PROMICRO16)
-  SFM_Module(uint8_t vccPin, uint8_t irqPin, HardwareSerial &hs);
+#if defined (ARDUINO_AVR_PROMICRO8) || defined (ARDUINO_AVR_PROMICRO16)
+  SFM_Module(uint8_t vccPin, uint8_t irqPin, unsigned long baudRate, HardwareSerial &hs);
 #else
   SFM_Module(uint8_t vccPin, uint8_t irqPin, uint8_t rxPin, uint8_t txPin, uint8_t uartIndex = 1);
 #endif
@@ -82,7 +82,7 @@ protected:
   uint8_t _getCmdReturn(uint8_t cmdType, uint8_t p1 = 0x00, uint8_t p2 = 0x00, uint8_t p3 = 0x00);
 #if defined(ESP32)
   HardwareSerial sfmSerial;
-#elif defined(ARDUINO_AVR_PROMICRO16)
+#elif defined (ARDUINO_AVR_PROMICRO8) || defined (ARDUINO_AVR_PROMICRO16)
   HardwareSerial &sfmSerial;
 #else
   SoftwareSerial sfmSerial;
@@ -94,7 +94,7 @@ protected:
   uint16_t userCount = 0;
   uint8_t vcc_pin;
   uint8_t irq_pin;
-#if not defined(ARDUINO_AVR_PROMICRO16)
+#if not (defined (ARDUINO_AVR_PROMICRO8) || defined (ARDUINO_AVR_PROMICRO16))
   uint8_t rx_pin;
   uint8_t tx_pin;
 #endif

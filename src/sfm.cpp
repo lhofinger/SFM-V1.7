@@ -28,14 +28,14 @@ SFM_Module::SFM_Module(uint8_t vccPin, uint8_t irqPin, uint8_t rxPin, uint8_t tx
   cmdBuffer[7] = 0xF5;
   sfmSerial.begin(115200, SERIAL_8N1, rx_pin, tx_pin);
 }
-#elif defined(ARDUINO_AVR_PROMICRO16)
-SFM_Module::SFM_Module(uint8_t vccPin, uint8_t irqPin, HardwareSerial &hs):sfmSerial(hs), vcc_pin(vccPin), irq_pin(irqPin){
+#elif defined (ARDUINO_AVR_PROMICRO8) || defined (ARDUINO_AVR_PROMICRO16)
+SFM_Module::SFM_Module(uint8_t vccPin, uint8_t irqPin, unsigned long baudRate, HardwareSerial &hs):sfmSerial(hs), vcc_pin(vccPin), irq_pin(irqPin){
   pinMode(irq_pin, INPUT);
   pinMode(vcc_pin, OUTPUT);
   digitalWrite(vcc_pin, HIGH); // Enable sensor vcc
   cmdBuffer[0] = 0xF5;
   cmdBuffer[7] = 0xF5;
-  sfmSerial.begin(115200, SERIAL_8N1);
+  sfmSerial.begin(baudRate, SERIAL_8N1);
   while (!Serial1)
     delay(100);
 }
@@ -211,8 +211,10 @@ uint8_t SFM_Module::sendCmd(uint8_t cmdType, uint8_t p1, uint8_t p2, uint8_t p3,
         }
       }
     }
-#if defined(ARDUINO_AVR_PROMICRO16)
+#if defined (ARDUINO_AVR_PROMICRO16)
     delay(2);
+#elif defined (ARDUINO_AVR_PROMICRO8)
+    delay(10);
 #else
     delay(1);
 #endif
@@ -266,7 +268,13 @@ uint8_t SFM_Module::_getDataPackage(String &package){
       }
       if(package.length() > 0) return SFM_ACK_SUCCESS;
     }
+#if defined (ARDUINO_AVR_PROMICRO16)
+    delay(2);
+#elif defined (ARDUINO_AVR_PROMICRO8)
+    delay(10);
+#else
     delay(1);
+#endif
   }
   while(sfmSerial.available()) sfmSerial.read(); // flush buffer
   package = "";
